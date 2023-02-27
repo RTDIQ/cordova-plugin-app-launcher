@@ -208,7 +208,12 @@ public class Launcher extends CordovaPlugin {
 			launchApp(options.getString("packageName"), extras);
 			return true;
 		} else if (options.has("uri")) {
-			launchIntent(options.getString("uri"), extras, flags);
+			String actionName = "";
+			if (options.has("actionName")) {
+				actionName = options.getString("actionName");
+			}
+
+			launchIntent(options.getString("uri"), actionName, extras, flags);
 			return true;
 		} else if (options.has("actionName")) {
 			launchAction(options.getString("actionName"), extras);
@@ -403,12 +408,19 @@ public class Launcher extends CordovaPlugin {
 	}
 
 	private void launchIntent(final String uri, final Bundle extras, final int flags) {
+		launchIntent(uri, "", extras, flags);
+	}
+
+	private void launchIntent(final String uri, String actionName, final Bundle extras, final int flags) {
 		final CordovaInterface mycordova = cordova;
 		final CordovaPlugin plugin = this;
 		cordova.getThreadPool().execute(new LauncherRunnable(this.callback) {
 			public void run() {
 				Intent intent = new Intent(Intent.ACTION_VIEW);
 				intent.setData(Uri.parse(uri));
+				if (!actionName.isEmpty()) {
+					intent.setAction(actionName);
+				}
 				if (flags != 0) {
 					intent.setFlags(flags);
 				}
